@@ -1,0 +1,501 @@
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #0f0f13;
+    --bg-secondary: #1a1a24;
+    --bg-card: #1e1e2e;
+    --bg-hover: #262637;
+    --border: #2a2a3d;
+    --text-primary: #e8e8f0;
+    --text-secondary: #9898b0;
+    --text-muted: #5a5a72;
+    --accent-red: #e10600;
+    --accent-green: #00e676;
+    --accent-yellow: #ffc107;
+    --accent-blue: #2196f3;
+    --accent-purple: #b388ff;
+    --soft: #ff4081;
+    --medium: #ffca28;
+    --hard: #e0e0e0;
+    --inter: #00c853;
+    --wet: #2196f3;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 8px;
+    --transition: 0.2s ease;
+}
+
+html {
+    font-size: 14px;
+}
+
+body {
+    font-family: var(--font);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+}
+
+/* ===== HEADER ===== */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--accent-red);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header__logo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.header__f1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent-red);
+    letter-spacing: -1px;
+}
+
+.header__dash {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.header__race-info {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.header__status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background var(--transition);
+}
+
+.status-dot.live {
+    background: var(--accent-green);
+    box-shadow: 0 0 8px var(--accent-green);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ===== DASHBOARD LAYOUT ===== */
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    flex: 1;
+    max-width: 1920px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ===== PANELS ===== */
+.panel {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.panel__title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.panel__content {
+    overflow-x: auto;
+}
+
+/* ===== STANDINGS TABLE ===== */
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.standings-table thead th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg-card);
+}
+
+.standings-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+}
+
+.standings-table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+.standings-table td {
+    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+}
+
+.standings-table .pos {
+    font-weight: 700;
+    text-align: center;
+    width: 3rem;
+}
+
+.standings-table .driver-name {
+    font-weight: 600;
+}
+
+.standings-table .team-name {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.standings-table .lap-time {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+}
+
+.standings-table .delta {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+}
+
+.standings-table .delta.positive {
+    color: var(--accent-red);
+}
+
+.standings-table .delta.negative {
+    color: var(--accent-green);
+}
+
+.loading-cell {
+    text-align: center;
+    padding: 2rem !important;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ===== TYRE INDICATORS ===== */
+.tyre-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tyre-badge.SOFT { background: var(--soft); color: #000; }
+.tyre-badge.MEDIUM { background: var(--medium); color: #000; }
+.tyre-badge.HARD { background: var(--hard); color: #000; }
+.tyre-badge.INTERMEDIATE { background: var(--inter); color: #000; }
+.tyre-badge.WET { background: var(--wet); color: #fff; }
+
+/* ===== POSITION CHANGE ===== */
+.pos-change {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 0.25rem;
+}
+
+.pos-change.up { color: var(--accent-green); }
+.pos-change.down { color: var(--accent-red); }
+.pos-change.same { color: var(--text-muted); }
+
+/* ===== INFO PANEL ===== */
+.panel--info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: transparent;
+    border: none;
+}
+
+.info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.info-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.info-item:nth-child(2n) {
+    border-right: none;
+}
+
+.info-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.info-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ===== INCIDENTS ===== */
+.incidents-list {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.incident-item {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.incident-item--empty {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.incident-badge {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.incident-badge.SC { background: var(--accent-yellow); color: #000; }
+.incident-badge.VSC { background: var(--accent-yellow); color: #000; }
+.incident-badge.PENALTY { background: var(--accent-red); color: #fff; }
+.incident-badge.DNF { background: var(--accent-red); color: #fff; }
+
+/* ===== CHARTS ===== */
+.chart-container {
+    padding: 1rem;
+    position: relative;
+    height: 250px;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ===== TELEMETRY ===== */
+.telemetry-select {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.telemetry-select label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.telemetry-select select {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    font-family: var(--font);
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.telemetry-select select:focus {
+    border-color: var(--accent-red);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    html {
+        font-size: 13px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-item {
+        border-right: none;
+    }
+}
+
+/* ===== TEAM COLOR BAR ===== */
+.team-color-bar {
+    display: inline-block;
+    width: 3px;
+    height: 1rem;
+    border-radius: 2px;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+}
+
+.driver-cell {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+/* ===== TYRE AGE ===== */
+.tyre-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.tyre-age {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ===== FASTEST LAP ===== */
+.lap-time.fastest {
+    color: var(--accent-purple);
+    font-weight: 700;
+}
+
+/* ===== SC ACTIVE ===== */
+.sc-active {
+    color: var(--accent-yellow) !important;
+    font-weight: 700;
+}
+
+/* ===== INCIDENT LAP ===== */
+.incident-lap {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    min-width: 45px;
+}
+
+/* ===== INFO ITEM WIDE ===== */
+.info-item--wide {
+    grid-column: 1 / -1;
+    border-right: none;
+}
+
+/* ===== PIT COUNT ===== */
+.pit-count {
+    text-align: center;
+    font-weight: 600;
+}
+
+/* ===== PANEL STANDINGS – scroll ===== */
+.panel--standings .panel__content {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+}

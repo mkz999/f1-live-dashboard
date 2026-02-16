@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Live Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header__logo">
+            <span class="header__f1">F1</span>
+            <span class="header__dash">LIVE DASHBOARD</span>
+        </div>
+        <div class="header__race-info">
+            <span id="race-name">Načítání...</span>
+        </div>
+        <div class="header__status">
+            <span class="status-dot"></span>
+            <span id="race-status">OFFLINE</span>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="dashboard">
+        <!-- Levý panel – pořadí jezdců -->
+        <section class="panel panel--standings">
+            <h2 class="panel__title">Pořadí jezdců</h2>
+            <div class="panel__content">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>Poz.</th>
+                            <th>Jezdec</th>
+                            <th>Tým</th>
+                            <th>Čas kola</th>
+                            <th>Delta</th>
+                            <th>Pneu</th>
+                            <th>Pit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standings-body">
+                        <tr>
+                            <td colspan="7" class="loading-cell">Čekání na data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Pravý panel – informace, grafy, telemetrie -->
+        <section class="panel panel--info">
+            <!-- Informace o závodě -->
+            <div class="info-card" id="race-info-card">
+                <h2 class="panel__title">Informace o závodě</h2>                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Okruh</span>
+                        <span class="info-value" id="circuit-name">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Kolo</span>
+                        <span class="info-value" id="current-lap">— / —</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Počasí</span>
+                        <span class="info-value" id="weather">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">SC / VSC</span>
+                        <span class="info-value" id="safety-car">—</span>
+                    </div>
+                    <div class="info-item info-item--wide">
+                        <span class="info-label">Nejrychlejší kolo</span>
+                        <span class="info-value" id="fastest-lap-val">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incidenty -->
+            <div class="info-card" id="incidents-card">
+                <h2 class="panel__title">Incidenty</h2>
+                <ul class="incidents-list" id="incidents-list">
+                    <li class="incident-item incident-item--empty">Žádné incidenty</li>
+                </ul>
+            </div>
+
+            <!-- Grafy -->
+            <div class="info-card" id="charts-card">
+                <h2 class="panel__title">Časy kol</h2>
+                <div class="chart-container">
+                    <canvas id="lap-times-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Telemetrie -->
+            <div class="info-card" id="telemetry-card">
+                <h2 class="panel__title">Telemetrie pedálů</h2>
+                <div class="telemetry-select">
+                    <label for="driver-select">Jezdec:</label>
+                    <select id="driver-select">
+                        <option value="">Vyberte jezdce</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="telemetry-chart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <span>F1 Live Dashboard – Školní projekt &copy; 2026</span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

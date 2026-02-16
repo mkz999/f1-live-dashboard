@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+
+# Static files collected
+staticfiles/
+static_collected/
+
+# FastF1 cache
+fastf1_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment variables
+.env
+.env.local
+
+# Distribution
+dist/
+build/
+*.egg-info/
