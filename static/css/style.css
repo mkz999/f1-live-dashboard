@@ -186,6 +186,23 @@ body {
     font-weight: 700;
     text-align: center;
     width: 3rem;
+    font-size: 1.1rem;
+}
+
+.standings-table .pos:nth-child(1) {
+    color: #ffd700;
+}
+
+.standings-table tbody tr:nth-child(1) .pos {
+    color: #ffd700;
+}
+
+.standings-table tbody tr:nth-child(2) .pos {
+    color: #c0c0c0;
+}
+
+.standings-table tbody tr:nth-child(3) .pos {
+    color: #cd7f32;
 }
 
 .standings-table .driver-name {
@@ -215,6 +232,13 @@ body {
     color: var(--accent-green);
 }
 
+.standings-table .interval {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
 .loading-cell {
     text-align: center;
     padding: 2rem !important;
@@ -222,21 +246,28 @@ body {
     font-style: italic;
 }
 
-/* ===== TYRE INDICATORS ===== */
+/* ===== TYRE INDICATORS – CIRCULAR ===== */
 .tyre-badge {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease;
 }
 
-.tyre-badge.SOFT { background: var(--soft); color: #000; }
+.tyre-badge:hover { transform: scale(1.1); }
+
+.tyre-badge.SOFT { background: var(--soft); color: #fff; }
 .tyre-badge.MEDIUM { background: var(--medium); color: #000; }
 .tyre-badge.HARD { background: var(--hard); color: #000; }
-.tyre-badge.INTERMEDIATE { background: var(--inter); color: #000; }
+.tyre-badge.INTERMEDIATE { background: var(--inter); color: #fff; }
 .tyre-badge.WET { background: var(--wet); color: #fff; }
 
 /* ===== POSITION CHANGE ===== */
@@ -246,9 +277,41 @@ body {
     margin-left: 0.25rem;
 }
 
-.pos-change.up { color: var(--accent-green); }
-.pos-change.down { color: var(--accent-red); }
+.pos-change.up { 
+    color: var(--accent-green); 
+    animation: pulse-up 0.6s ease-out;
+}
+
+.pos-change.down { 
+    color: var(--accent-red); 
+    animation: pulse-down 0.6s ease-out;
+}
+
 .pos-change.same { color: var(--text-muted); }
+
+@keyframes pulse-up {
+    0% { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-down {
+    0% { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Podium colors */
+.standings-table tbody tr:first-child { 
+    background: rgba(255, 215, 0, 0.08);
+    border-left: 3px solid #ffd700;
+}
+
+.standings-table tbody tr:nth-child(2) { 
+    background: rgba(192, 192, 192, 0.05);
+}
+
+.standings-table tbody tr:nth-child(3) { 
+    background: rgba(205, 127, 50, 0.05);
+}
 
 /* ===== INFO PANEL ===== */
 .panel--info {
@@ -498,4 +561,33 @@ body {
 .panel--standings .panel__content {
     max-height: calc(100vh - 150px);
     overflow-y: auto;
+}
+
+/* ===== ANIMATION: Position Changes ===== */
+@keyframes flash-green {
+    0% { background: rgba(0, 230, 118, 0.25); }
+    100% { background: transparent; }
+}
+
+@keyframes flash-red {
+    0% { background: rgba(225, 6, 0, 0.25); }
+    100% { background: transparent; }
+}
+
+.row-pos-up {
+    animation: flash-green 1.5s ease-out;
+}
+
+.row-pos-down {
+    animation: flash-red 1.5s ease-out;
+}
+
+/* ===== ANIMATION: Pit Stop Flash ===== */
+@keyframes pit-flash {
+    0%, 50% { background: rgba(33, 150, 243, 0.2); }
+    100% { background: transparent; }
+}
+
+.row-pit {
+    animation: pit-flash 2s ease-out;
 }

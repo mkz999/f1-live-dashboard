@@ -4,14 +4,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🏎️ F1 Live Dashboard loaded');
-
-    // ===== STAV =====
+    console.log('🏎️ F1 Live Dashboard loaded');    // ===== STAV =====
     let lapTimesChart = null;
     let telemetryChart = null;
     let selectedDriver = '';
     let driversLoaded = false;
     let lastLap = -1;
+    let previousPositions = {};  // track position changes
 
     // ===== DOM ELEMENTY =====
     const $ = (sel) => document.querySelector(sel);
@@ -89,9 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let flEl = $('#fastest-lap-val');
             if (flEl) flEl.textContent = flInfo;
         }
-    }
-
-    // ===== 2. RANKING =====
+    }    // ===== 2. RANKING =====
     async function updateRanking() {
         const data = await fetchJSON('/api/ranking/');
         if (!data || data.status !== 'ok' || !data.drivers.length) return;
@@ -108,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 posChangeHtml = `<span class="pos-change same">—</span>`;
             }
 
-            // Tyre badge
+            // Tyre badge (kruhové)
             const compound = d.compound || 'UNKNOWN';
             const tyreHtml = `<span class="tyre-badge ${compound}">${compound.charAt(0)}</span>`;
             const tyreAge = d.tyre_age > 0 ? `<span class="tyre-age">${d.tyre_age}L</span>` : '';
@@ -128,16 +125,36 @@ document.addEventListener('DOMContentLoaded', () => {
             // Lap time
             const lapTimeClass = d.is_fastest_lap ? 'lap-time fastest' : 'lap-time';
 
+            // Interval display
+            let intervalDisplay = '—';
+            if (d.position > 1 && d.delta_ms && data.drivers[d.position - 2]) {
+                const carAhead = data.drivers[d.position - 2];
+                const interval = (d.delta_ms - (carAhead.delta_ms || 0)) / 1000;
+                if (interval > 0) intervalDisplay = `+${interval.toFixed(3)}s`;
+            }
+
+            // Determine row animation class
+            let rowClass = '';
+            const prevPos = previousPositions[d.abbreviation];
+            if (prevPos !== undefined) {
+                if (d.position < prevPos) rowClass = 'row-pos-up';
+                else if (d.position > prevPos) rowClass = 'row-pos-down';
+            }
+
             html += `
-            <tr>
+            <tr class="${rowClass}">
                 <td class="pos">${d.position}${posChangeHtml}</td>
                 <td class="driver-cell">${colorBar}<span class="driver-name">${d.abbreviation}</span>${flIcon}</td>
                 <td class="team-name">${d.team}</td>
                 <td class="${lapTimeClass}">${d.lap_time}</td>
                 <td class="delta ${deltaClass}">${d.delta}</td>
+                <td class="interval">${intervalDisplay}</td>
                 <td class="tyre-cell">${tyreHtml}${tyreAge}</td>
                 <td class="pit-count">${d.pit_stops}</td>
             </tr>`;
+
+            // Track position
+            previousPositions[d.abbreviation] = d.position;
         }
 
         standingsBody.innerHTML = html;
