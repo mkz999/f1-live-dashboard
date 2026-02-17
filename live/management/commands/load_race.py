@@ -69,11 +69,11 @@ class Command(BaseCommand):
 
         event = session.event
         self.stdout.write(self.style.SUCCESS(
-            f"✅ Session načtena: {event['EventName']} – {event['Location']}"
+            f"Session načtena: {event['EventName']} – {event['Location']}"
         ))
 
         # --- 2. Vytvoření Race objektu ---
-        self.stdout.write("💾 Ukládám informace o závodě...")
+        self.stdout.write("Ukládám informace o závodě...")
         race = Race.objects.create(
             year=year,
             round_number=round_num,
@@ -245,7 +245,7 @@ class Command(BaseCommand):
 
         self.stdout.write(f"\n{'='*60}")
         self.stdout.write(self.style.SUCCESS(
-            f"  ✅ Data úspěšně načtena pro: {race.grand_prix} {race.year}"
+            f"  Data úspěšně načtena pro: {race.grand_prix} {race.year}"
         ))
         self.stdout.write(f"  Celkem kol: {race.total_laps}")
         self.stdout.write(f"  Jezdců: {len(drivers_map)}")

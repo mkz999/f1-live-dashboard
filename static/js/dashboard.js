@@ -4,7 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🏎️ F1 Live Dashboard loaded');    // ===== STAV =====
+    console.log('F1 Live Dashboard loaded');
     let lapTimesChart = null;
     let telemetryChart = null;
     let selectedDriver = '';

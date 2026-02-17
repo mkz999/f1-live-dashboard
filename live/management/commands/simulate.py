@@ -45,7 +45,7 @@ class Command(BaseCommand):
             race.is_finished = False
             race.safety_car = 'NONE'
             race.save()
-            self.stdout.write(self.style.SUCCESS(f"✅ Závod {race.grand_prix} resetován na kolo 0."))
+            self.stdout.write(self.style.SUCCESS(f"Závod {race.grand_prix} resetován na kolo 0."))
             return
 
         # Nastav počáteční kolo
