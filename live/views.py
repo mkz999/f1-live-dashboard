@@ -5,12 +5,10 @@ from .models import Race, Driver, LapTiming, PitStop, TyreStint, Telemetry, Inci
 
 
 def dashboard(request):
-    """F1 Live Dashboard main page."""
     return render(request, 'live/dashboard.html')
 
 
 def _get_active_race():
-    """Return active running race or last loaded race."""
     race = Race.objects.filter(is_running=True).first()
     if not race:
         race = Race.objects.filter(data_loaded=True).order_by('-id').first()
@@ -18,7 +16,6 @@ def _get_active_race():
 
 
 def api_race(request):
-    """GET /api/race/ - Basic race information."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'message': 'No race loaded.'})
@@ -58,40 +55,11 @@ def api_race(request):
 
 
 def api_ranking(request):
-    """GET /api/ranking/ - Driver standings for current lap."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'drivers': []})
 
-        drivers = Driver.objects.filter(race=race).order_by('grid_position')
-        result = []
-        for d in drivers:
-            stint = TyreStint.objects.filter(
-                race=race, driver=d, start_lap__lte=max(current_lap, 1)
-            ).order_by('-stint_number').first()
-
-            pit_count = PitStop.objects.filter(
-                race=race, driver=d, lap_number__lte=max(current_lap, 1)
-            ).count()
-
-            result.append({
-                'position': d.grid_position,
-                'abbreviation': d.abbreviation,
-                'full_name': d.full_name,
-                'number': d.number,
-                'team': d.team,
-                'team_color': d.team_color,
-                'grid_position': d.grid_position,
-                'pos_change': 0,
-                'lap_time': '—',
-                'delta': '—',
-                'status': d.status,
-                'compound': stint.compound if stint else 'UNKNOWN',
-                'tyre_age': stint.tyre_age if stint else 0,
-                'pit_stops': pit_count,
-                'is_fastest_lap': d.is_fastest_lap,
-            })
-        return JsonResponse({'status': 'ok', 'current_lap': current_lap, 'drivers': result})
+    current_lap = race.current_lap
 
     timings = LapTiming.objects.filter(
         race=race, lap_number=current_lap
@@ -105,7 +73,6 @@ def api_ranking(request):
             race=race, driver=d,
             start_lap__lte=current_lap,
         ).filter(
-            # end_lap >= current_lap OR end_lap is null
             end_lap__gte=current_lap
         ).first()
 
@@ -156,7 +123,6 @@ def api_ranking(request):
 
 
 def api_laptimes(request):
-    """GET /api/laptimes/ - Lap times for charts (top 5 drivers)."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'data': {}})
@@ -195,7 +161,6 @@ def api_laptimes(request):
 
 
 def api_telemetry(request, abbreviation):
-    """GET /api/telemetry/<abbreviation>/ - Pedal telemetry for driver."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race'})
@@ -238,7 +203,6 @@ def api_telemetry(request, abbreviation):
 
 
 def api_incidents(request):
-    """GET /api/incidents/ - Race incidents up to current lap."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'incidents': []})
@@ -268,7 +232,6 @@ def api_incidents(request):
 
 
 def api_drivers(request):
-    """GET /api/drivers/ - List all drivers for telemetry select."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'drivers': []})

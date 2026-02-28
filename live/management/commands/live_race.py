@@ -9,7 +9,6 @@ from live.models import Race, Driver, LapTiming, PitStop, TyreStint, Incident
 
 
 class OpenF1Client:
-    """Klient pro OpenF1 API s OAuth2 autentizací."""
     
     def __init__(self, username, password):
         self.username = username
@@ -20,7 +19,7 @@ class OpenF1Client:
         self.token_expiry = None
         
     def authenticate(self):
-        """Získej OAuth2 token."""
+        
         try:
             response = requests.post(
                 self.token_url,
@@ -67,19 +66,15 @@ class OpenF1Client:
             return None
     
     def get_sessions(self):
-        """Vrátí seznam aktuálních sessions."""
         return self._make_request("/sessions")
     
     def get_drivers(self, session_key):
-        """Vrátí seznam jezdců v session."""
         return self._make_request(f"/drivers?session_key={session_key}")
     
     def get_laps(self, session_key):
-        """Vrátí seznam kol v session."""
         return self._make_request(f"/laps?session_key={session_key}")
     
     def get_race_control(self, session_key):
-        """Vrátí race control eventy."""
         return self._make_request(f"/race_control?session_key={session_key}")
 
 
@@ -95,13 +90,12 @@ class Command(BaseCommand):
         )
     
     def handle(self, *args, **options):
-        # Načti credentials z .env
         username = os.getenv("OPENF1_USERNAME")
         password = os.getenv("OPENF1_PASSWORD")
         
         if not username or not password:
             raise CommandError(
-                "OPENF1_USERNAME and OPENF1_PASSWORD must be defined in .env"
+                "OpenF1 credentials not set."
             )
         
         interval = options.get('interval', 3)

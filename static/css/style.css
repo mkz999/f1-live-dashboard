@@ -1,4 +1,3 @@
-/* ===== RESET & BASE ===== */
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -43,7 +42,6 @@ body {
     line-height: 1.5;
 }
 
-/* ===== HEADER ===== */
 .header {
     display: flex;
     align-items: center;
@@ -112,7 +110,6 @@ body {
     50% { opacity: 0.4; }
 }
 
-/* ===== DASHBOARD LAYOUT ===== */
 .dashboard {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -124,7 +121,6 @@ body {
     width: 100%;
 }
 
-/* ===== PANELS ===== */
 .panel {
     background: var(--bg-card);
     border-radius: var(--radius);
@@ -147,7 +143,6 @@ body {
     overflow-x: auto;
 }
 
-/* ===== STANDINGS TABLE ===== */
 .standings-table {
     width: 100%;
     border-collapse: collapse;
@@ -246,7 +241,6 @@ body {
     font-style: italic;
 }
 
-/* ===== TYRE INDICATORS – CIRCULAR ===== */
 .tyre-badge {
     display: inline-flex;
     align-items: center;
@@ -270,7 +264,6 @@ body {
 .tyre-badge.INTERMEDIATE { background: var(--inter); color: #fff; }
 .tyre-badge.WET { background: var(--wet); color: #fff; }
 
-/* ===== POSITION CHANGE ===== */
 .pos-change {
     font-size: 0.7rem;
     font-weight: 600;
@@ -299,7 +292,6 @@ body {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Podium colors */
 .standings-table tbody tr:first-child { 
     background: rgba(255, 215, 0, 0.08);
     border-left: 3px solid #ffd700;
@@ -313,7 +305,6 @@ body {
     background: rgba(205, 127, 50, 0.05);
 }
 
-/* ===== INFO PANEL ===== */
 .panel--info {
     display: flex;
     flex-direction: column;
@@ -362,7 +353,6 @@ body {
     color: var(--text-primary);
 }
 
-/* ===== INCIDENTS ===== */
 .incidents-list {
     list-style: none;
     max-height: 200px;
@@ -397,7 +387,6 @@ body {
 .incident-badge.PENALTY { background: var(--accent-red); color: #fff; }
 .incident-badge.DNF { background: var(--accent-red); color: #fff; }
 
-/* ===== CHARTS ===== */
 .chart-container {
     padding: 1rem;
     position: relative;
@@ -409,7 +398,6 @@ body {
     height: 100% !important;
 }
 
-/* ===== TELEMETRY ===== */
 .telemetry-select {
     padding: 0.5rem 1rem;
     display: flex;
@@ -440,7 +428,6 @@ body {
     border-color: var(--accent-red);
 }
 
-/* ===== FOOTER ===== */
 .footer {
     text-align: center;
     padding: 0.75rem 1rem;
@@ -450,7 +437,6 @@ body {
     background: var(--bg-secondary);
 }
 
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -469,7 +455,6 @@ body {
     background: var(--text-muted);
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .dashboard {
         grid-template-columns: 1fr;
@@ -496,7 +481,6 @@ body {
     }
 }
 
-/* ===== TEAM COLOR BAR ===== */
 .team-color-bar {
     display: inline-block;
     width: 3px;
@@ -512,7 +496,6 @@ body {
     gap: 0;
 }
 
-/* ===== TYRE AGE ===== */
 .tyre-cell {
     display: flex;
     align-items: center;
@@ -525,19 +508,16 @@ body {
     font-weight: 500;
 }
 
-/* ===== FASTEST LAP ===== */
 .lap-time.fastest {
     color: var(--accent-purple);
     font-weight: 700;
 }
 
-/* ===== SC ACTIVE ===== */
 .sc-active {
     color: var(--accent-yellow) !important;
     font-weight: 700;
 }
 
-/* ===== INCIDENT LAP ===== */
 .incident-lap {
     font-size: 0.7rem;
     color: var(--text-muted);
@@ -545,25 +525,20 @@ body {
     min-width: 45px;
 }
 
-/* ===== INFO ITEM WIDE ===== */
 .info-item--wide {
     grid-column: 1 / -1;
     border-right: none;
 }
 
-/* ===== PIT COUNT ===== */
 .pit-count {
     text-align: center;
     font-weight: 600;
 }
 
-/* ===== PANEL STANDINGS – scroll ===== */
 .panel--standings .panel__content {
-    max-height: calc(100vh - 150px);
-    overflow-y: auto;
+    overflow-y: visible;
 }
 
-/* ===== ANIMATION: Position Changes ===== */
 @keyframes flash-green {
     0% { background: rgba(0, 230, 118, 0.25); }
     100% { background: transparent; }
@@ -582,7 +557,6 @@ body {
     animation: flash-red 1.5s ease-out;
 }
 
-/* ===== ANIMATION: Pit Stop Flash ===== */
 @keyframes pit-flash {
     0%, 50% { background: rgba(33, 150, 243, 0.2); }
     100% { background: transparent; }

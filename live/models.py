@@ -153,7 +153,6 @@ class Telemetry(models.Model):
     race = models.ForeignKey(Race, on_delete=models.CASCADE, related_name='telemetry')
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='telemetry')
     lap_number = models.IntegerField(help_text="Číslo kola")
-    # Data uložena jako JSON string – pole hodnot
     distance = models.TextField(help_text="JSON pole vzdáleností (m)")
     speed = models.TextField(help_text="JSON pole rychlostí (km/h)")
     throttle = models.TextField(help_text="JSON pole polohy plynu (0–100)")

@@ -4,10 +4,7 @@ from . import views
 app_name = 'live'
 
 urlpatterns = [
-    # Dashboard stránka
     path('', views.dashboard, name='dashboard'),
-
-    # API endpointy
     path('api/race/', views.api_race, name='api_race'),
     path('api/ranking/', views.api_ranking, name='api_ranking'),
     path('api/laptimes/', views.api_laptimes, name='api_laptimes'),

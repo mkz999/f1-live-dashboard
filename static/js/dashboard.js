@@ -1,20 +1,11 @@
-/**
- * F1 Live Dashboard – hlavní JavaScript soubor.
- * Live aktualizace: race/ranking/incidents/laptimes každých 3s, telemetrie 1.5s
- */
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('F1 Live Dashboard loaded');
     let lapTimesChart = null;
     let telemetryChart = null;
     let selectedDriver = '';
     let driversLoaded = false;
     let lastLap = -1;
-    let previousPositions = {};  // track position changes
-
-    // ===== DOM ELEMENTY =====
+    let previousPositions = {};
     const $ = (sel) => document.querySelector(sel);
-    const statusDot = $('.status-dot');
     const statusText = $('#race-status');
     const raceName = $('#race-name');
     const circuitName = $('#circuit-name');
@@ -24,15 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const standingsBody = $('#standings-body');
     const incidentsList = $('#incidents-list');
     const driverSelect = $('#driver-select');
-
-    // ===== POMOCNÉ FUNKCE =====
     async function fetchJSON(url) {
         try {
             const res = await fetch(url);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             return await res.json();
         } catch (e) {
-            console.error(`Fetch error ${url}:`, e);
             return null;
         }
     }
@@ -43,12 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const sec = (seconds % 60).toFixed(3);
         return `${min}:${sec.padStart(6, '0')}`;
     }
-
-    // ===== 1. RACE INFO =====
     async function updateRaceInfo() {
         const data = await fetchJSON('/api/race/');
         if (!data || data.status !== 'ok') {
-            statusDot.classList.remove('live');
             statusText.textContent = 'OFFLINE';
             raceName.textContent = 'Žádný závod';
             return;
@@ -58,44 +43,33 @@ document.addEventListener('DOMContentLoaded', () => {
         raceName.textContent = `${r.grand_prix} – ${r.country}`;
         circuitName.textContent = r.circuit;
         currentLapEl.textContent = `${r.current_lap} / ${r.total_laps}`;
-
-        // Počasí + teploty
         let weatherStr = r.weather || '—';
         if (r.air_temp) weatherStr += ` | Vzduch ${r.air_temp}°C`;
         if (r.track_temp) weatherStr += ` | Trať ${r.track_temp}°C`;
         weatherEl.textContent = weatherStr;
-
-        // Safety car
         const scMap = { 'NONE': '—', 'SC': '🟡 SAFETY CAR', 'VSC': '🟡 VSC', 'RED': '🔴 RED FLAG' };
         safetyCarEl.textContent = scMap[r.safety_car] || '—';
         safetyCarEl.className = 'info-value' + (r.safety_car !== 'NONE' ? ' sc-active' : '');
-
-        // Status
         if (r.is_running) {
-            statusDot.classList.add('live');
             statusText.textContent = 'LIVE';
         } else if (r.is_finished) {
-            statusDot.classList.remove('live');
             statusText.textContent = 'DOKONČENO';
         } else {
-            statusDot.classList.remove('live');
             statusText.textContent = 'PŘIPRAVENO';
         }
-
-        // Rychlé kolo
         if (r.fastest_lap) {
             const flInfo = `${r.fastest_lap.driver} – ${r.fastest_lap.time} (kolo ${r.fastest_lap.lap})`;
             let flEl = $('#fastest-lap-val');
             if (flEl) flEl.textContent = flInfo;
         }
-    }    // ===== 2. RANKING =====
+    }
+
     async function updateRanking() {
         const data = await fetchJSON('/api/ranking/');
         if (!data || data.status !== 'ok' || !data.drivers.length) return;
 
         let html = '';
         for (const d of data.drivers) {
-            // Změna pozice
             let posChangeHtml = '';
             if (d.pos_change > 0) {
                 posChangeHtml = `<span class="pos-change up">▲${d.pos_change}</span>`;
@@ -104,36 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 posChangeHtml = `<span class="pos-change same">—</span>`;
             }
-
-            // Tyre badge (kruhové)
             const compound = d.compound || 'UNKNOWN';
             const tyreHtml = `<span class="tyre-badge ${compound}">${compound.charAt(0)}</span>`;
             const tyreAge = d.tyre_age > 0 ? `<span class="tyre-age">${d.tyre_age}L</span>` : '';
-
-            // Delta
             let deltaClass = '';
             if (d.delta === 'LEADER') deltaClass = '';
             else if (d.delta_ms > 0) deltaClass = 'positive';
             else if (d.delta_ms < 0) deltaClass = 'negative';
-
-            // Fastest lap indicator
             const flIcon = d.is_fastest_lap ? ' 🟣' : '';
-
-            // Team color bar
             const colorBar = `<span class="team-color-bar" style="background:${d.team_color}"></span>`;
-
-            // Lap time
             const lapTimeClass = d.is_fastest_lap ? 'lap-time fastest' : 'lap-time';
-
-            // Interval display
             let intervalDisplay = '—';
             if (d.position > 1 && d.delta_ms && data.drivers[d.position - 2]) {
                 const carAhead = data.drivers[d.position - 2];
                 const interval = (d.delta_ms - (carAhead.delta_ms || 0)) / 1000;
                 if (interval > 0) intervalDisplay = `+${interval.toFixed(3)}s`;
             }
-
-            // Determine row animation class
             let rowClass = '';
             const prevPos = previousPositions[d.abbreviation];
             if (prevPos !== undefined) {
@@ -152,15 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="tyre-cell">${tyreHtml}${tyreAge}</td>
                 <td class="pit-count">${d.pit_stops}</td>
             </tr>`;
-
-            // Track position
             previousPositions[d.abbreviation] = d.position;
         }
 
         standingsBody.innerHTML = html;
     }
 
-    // ===== 3. INCIDENTS =====
     async function updateIncidents() {
         const data = await fetchJSON('/api/incidents/');
         if (!data || data.status !== 'ok') return;
@@ -179,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         incidentsList.innerHTML = html;
     }
 
-    // ===== 4. LAP TIMES CHART =====
     async function updateLapTimesChart() {
         const data = await fetchJSON('/api/laptimes/');
         if (!data || data.status !== 'ok') return;
@@ -243,7 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ===== 5. DRIVERS LIST =====
     async function loadDriversList() {
         const data = await fetchJSON('/api/drivers/');
         if (!data || data.status !== 'ok') return;
@@ -255,8 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         driverSelect.innerHTML = html;
         driversLoaded = true;
-
-        // Auto-select prvního s telemetrií
         if (!selectedDriver) {
             const first = data.drivers.find(d => d.has_telemetry);
             if (first) {
@@ -266,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ===== 6. TELEMETRY CHART =====
     async function updateTelemetry() {
         if (!selectedDriver) return;
 
@@ -307,8 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 yAxisID: 'y1',
             },
         ];
-
-        // Aktualizuj title
         const title = `Telemetrie – ${data.driver_name || data.driver} | Kolo ${data.lap}`;
         const titleEl = $('#telemetry-card .panel__title');
         if (titleEl) titleEl.textContent = title;
@@ -359,15 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ===== EVENT LISTENERS =====
     driverSelect.addEventListener('change', (e) => {
         selectedDriver = e.target.value;
         updateTelemetry();
     });
 
-    // ===== HLAVNÍ SMYČKY =====
-
-    // Aktualizace race/ranking/incidents/laptimes – každé 3s
     async function mainLoop() {
         await updateRaceInfo();
         await updateRanking();
@@ -379,18 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Telemetrie – každých 1.5s
     async function telemetryLoop() {
         await updateTelemetry();
     }
 
-    // Počáteční načtení
     mainLoop();
     telemetryLoop();
-
-    // Intervaly
     setInterval(mainLoop, 3000);
     setInterval(telemetryLoop, 1500);
-
-    console.log('🏎️ F1 Live Dashboard – live aktualizace spuštěny');
 });
