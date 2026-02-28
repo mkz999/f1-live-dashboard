@@ -34,20 +34,20 @@ class OpenF1Client:
             data = response.json()
             self.token = data.get("access_token")
             expires_in = int(data.get("expires_in", 3600))
-            self.token_expiry = time.time() + expires_in - 60  # refresh 60s před expirací
-            print(f"✓ OAuth2 token acquired (expires in {expires_in}s)")
+            self.token_expiry = time.time() + expires_in - 60
+            print(f"OAuth2 token acquired (expires in {expires_in}s)")
             return True
         except Exception as e:
-            print(f"✗ Authentication failed: {e}")
+            print(f"Authentication failed: {e}")
             return False
     
     def _refresh_token_if_needed(self):
-        """Refresh token pokud je blízko expiraci."""
+        """Refresh token if close to expiry."""
         if self.token_expiry and time.time() >= self.token_expiry:
             self.authenticate()
     
     def _make_request(self, endpoint):
-        """Dělej API request s autentizací."""
+        """Make API request with authentication."""
         self._refresh_token_if_needed()
         
         headers = {
@@ -63,7 +63,7 @@ class OpenF1Client:
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            print(f"✗ API request failed: {e}")
+            print(f"API request failed: {e}")
             return None
     
     def get_sessions(self):
@@ -84,7 +84,7 @@ class OpenF1Client:
 
 
 class Command(BaseCommand):
-    help = "Fetch live race data from OpenF1 API a updatuj Django models"
+    help = "Fetch live race data from OpenF1 API and update Django models"
     
     def add_arguments(self, parser):
         parser.add_argument(
@@ -101,20 +101,19 @@ class Command(BaseCommand):
         
         if not username or not password:
             raise CommandError(
-                "OPENF1_USERNAME a OPENF1_PASSWORD musí být definovány v .env"
+                "OPENF1_USERNAME and OPENF1_PASSWORD must be defined in .env"
             )
         
         interval = options.get('interval', 3)
         
-        # Připoj se k OpenF1
         client = OpenF1Client(username, password)
         if not client.authenticate():
-            raise CommandError("Autentizace na OpenF1 selhala")
+            raise CommandError("OpenF1 authentication failed")
         
-        self.stdout.write(self.style.SUCCESS("✓ Připojen k OpenF1 API"))
+        self.stdout.write(self.style.SUCCESS("Connected to OpenF1 API"))
         self.stdout.write(
             f"  Polling interval: {interval}s\n"
-            f"  Stiskni Ctrl+C pro zastavení\n"
+            f"  Press Ctrl+C to stop\n"
         )
         
         try:
@@ -124,14 +123,12 @@ class Command(BaseCommand):
                 timestamp = datetime.now().strftime("%H:%M:%S")
                 self.stdout.write(f"\n[{timestamp}] Iterace #{iteration}", ending="")
                 
-                # Fetchni sessions
                 sessions = client.get_sessions()
                 if not sessions:
-                    self.stdout.write(" – Sessions nedostupné")
+                    self.stdout.write(" - Sessions unavailable")
                     time.sleep(interval)
                     continue
                 
-                # Najdi aktuální session (poslední live session)
                 current_session = None
                 for session in sessions:
                     if session.get("status") in ["live", "completed"]:
@@ -139,7 +136,7 @@ class Command(BaseCommand):
                         break
                 
                 if not current_session:
-                    self.stdout.write(" – Žádná aktuální session")
+                    self.stdout.write(" - No active session")
                     time.sleep(interval)
                     continue
                 
@@ -149,11 +146,9 @@ class Command(BaseCommand):
                 round_num = current_session.get("round", 0)
                 
                 self.stdout.write(
-                    f" – {year} R{round_num} {session_type} "
+                    f" - {year} R{round_num} {session_type} "
                     f"({current_session.get('status')})"
                 )
-                
-                # Vytvoř nebo updatuj Race
                 race, created = Race.objects.get_or_create(
                     year=int(year),
                     round_number=round_num,
@@ -167,12 +162,9 @@ class Command(BaseCommand):
                     }
                 )
                 
-                # Updatuj Race stav
                 race.is_running = current_session.get("status") == "live"
                 race.is_finished = current_session.get("status") == "completed"
                 race.save(update_fields=['is_running', 'is_finished'])
-                
-                # Fetchni a updatuj drivers
                 drivers_data = client.get_drivers(session_key)
                 if drivers_data:
                     for driver_data in drivers_data:
@@ -189,18 +181,14 @@ class Command(BaseCommand):
                             }
                         )
                         
-                        # Updatuj driver aktuální status
                         driver.status = driver_data.get("status", "Running")
                         driver.save(update_fields=['status'])
-                
-                # Fetchni a updatuj laps
                 laps_data = client.get_laps(session_key)
                 if laps_data:
                     for lap_data in laps_data:
                         driver_abbr = lap_data.get("driver_abbreviation")
                         lap_num = lap_data.get("lap_number")
                         
-                        # Najdi driver
                         try:
                             driver = Driver.objects.get(
                                 race=race,
@@ -209,7 +197,6 @@ class Command(BaseCommand):
                         except Driver.DoesNotExist:
                             continue
                         
-                        # Create or update LapTiming
                         lap_time = lap_data.get("duration_ms")
                         
                         LapTiming.objects.update_or_create(
@@ -226,14 +213,11 @@ class Command(BaseCommand):
                             }
                         )
                 
-                # Fetchni a updatuj incidents
                 rc_data = client.get_race_control(session_key)
                 if rc_data:
                     for event in rc_data:
                         lap_num = event.get("lap_number", 0)
                         message = event.get("message", "")
-                        
-                        # Mapuj message na incident_type
                         incident_type = "OTHER"
                         if "SAFETY" in message.upper() and "VIRTUAL" not in message.upper():
                             incident_type = "SC"
@@ -244,14 +228,12 @@ class Command(BaseCommand):
                         elif "PENALTY" in message.upper():
                             incident_type = "PENALTY"
                         
-                        # Try to find driver if in message
                         driver = None
                         for d in race.drivers.all():
                             if d.abbreviation in message.upper():
                                 driver = d
                                 break
                         
-                        # Vytvoř incident (prevent duplicates s lap_number + message)
                         Incident.objects.get_or_create(
                             race=race,
                             lap_number=lap_num,
@@ -265,4 +247,4 @@ class Command(BaseCommand):
                 time.sleep(interval)
         
         except KeyboardInterrupt:
-            self.stdout.write("\n\n✓ Live race monitoring zastaveno")
+            self.stdout.write("\n\nLive race monitoring stopped")

@@ -5,16 +5,12 @@ from .models import Race, Driver, LapTiming, PitStop, TyreStint, Telemetry, Inci
 
 
 def dashboard(request):
-    """Hlavní stránka F1 Live Dashboard."""
+    """F1 Live Dashboard main page."""
     return render(request, 'live/dashboard.html')
 
 
-# ===================================================================
-#  API ENDPOINTY – volané frontendem přes AJAX / Fetch
-# ===================================================================
-
 def _get_active_race():
-    """Vrátí aktuálně běžící závod, nebo poslední načtený."""
+    """Return active running race or last loaded race."""
     race = Race.objects.filter(is_running=True).first()
     if not race:
         race = Race.objects.filter(data_loaded=True).order_by('-id').first()
@@ -22,12 +18,11 @@ def _get_active_race():
 
 
 def api_race(request):
-    """GET /api/race/ – základní informace o závodě."""
+    """GET /api/race/ - Basic race information."""
     race = _get_active_race()
     if not race:
-        return JsonResponse({'status': 'no_race', 'message': 'Žádný závod není načten.'})
+        return JsonResponse({'status': 'no_race', 'message': 'No race loaded.'})
 
-    # Nejrychlejší kolo
     fastest = None
     fastest_driver = Driver.objects.filter(race=race, is_fastest_lap=True).first()
     if fastest_driver:
@@ -63,18 +58,14 @@ def api_race(request):
 
 
 def api_ranking(request):
-    """GET /api/ranking/ – pořadí jezdců v aktuálním kole."""
+    """GET /api/ranking/ - Driver standings for current lap."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'drivers': []})
 
-    current_lap = race.current_lap
-    if current_lap < 1:
-        # Závod ještě nezačal – vrátíme startovní rošt
         drivers = Driver.objects.filter(race=race).order_by('grid_position')
         result = []
         for d in drivers:
-            # Aktuální stint pneumatik
             stint = TyreStint.objects.filter(
                 race=race, driver=d, start_lap__lte=max(current_lap, 1)
             ).order_by('-stint_number').first()
@@ -102,7 +93,6 @@ def api_ranking(request):
             })
         return JsonResponse({'status': 'ok', 'current_lap': current_lap, 'drivers': result})
 
-    # Načti timings pro aktuální kolo
     timings = LapTiming.objects.filter(
         race=race, lap_number=current_lap
     ).select_related('driver').order_by('position')
@@ -111,7 +101,6 @@ def api_ranking(request):
     for t in timings:
         d = t.driver
 
-        # Aktuální stint pneumatik
         stint = TyreStint.objects.filter(
             race=race, driver=d,
             start_lap__lte=current_lap,
@@ -126,18 +115,15 @@ def api_ranking(request):
                 start_lap__lte=current_lap,
             ).order_by('-stint_number').first()
 
-        # Počet pitstopů do aktuálního kola
         pit_count = PitStop.objects.filter(
             race=race, driver=d, lap_number__lte=current_lap
         ).count()
 
-        # Stáří pneumatiky v aktuálním kole
         tyre_age = 0
         if stint:
             tyre_age = current_lap - stint.start_lap + 1
 
-        # Změna pozice oproti gridu
-        pos_change = d.grid_position - t.position  # kladné = posun nahoru
+        pos_change = d.grid_position - t.position
 
         result.append({
             'position': t.position,
@@ -170,14 +156,13 @@ def api_ranking(request):
 
 
 def api_laptimes(request):
-    """GET /api/laptimes/ – časy kol pro grafy (top 5 jezdců)."""
+    """GET /api/laptimes/ - Lap times for charts (top 5 drivers)."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'data': {}})
 
     current_lap = race.current_lap
 
-    # Top 5 jezdců podle aktuální pozice
     if current_lap >= 1:
         top_timings = LapTiming.objects.filter(
             race=race, lap_number=current_lap
@@ -210,18 +195,18 @@ def api_laptimes(request):
 
 
 def api_telemetry(request, abbreviation):
-    """GET /api/telemetry/<abbreviation>/ – telemetrie pedálů pro jezdce."""
+    """GET /api/telemetry/<abbreviation>/ - Pedal telemetry for driver."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race'})
 
     driver = Driver.objects.filter(race=race, abbreviation=abbreviation.upper()).first()
     if not driver:
-        return JsonResponse({'status': 'error', 'message': 'Jezdec nenalezen.'})
+        return JsonResponse({'status': 'error', 'message': 'Driver not found.'})
 
     current_lap = race.current_lap
 
-    # Najdi nejbližší kolo s telemetrií (<= current_lap)
+
     tel = Telemetry.objects.filter(
         race=race, driver=driver, lap_number__lte=current_lap
     ).order_by('-lap_number').first()
@@ -253,7 +238,7 @@ def api_telemetry(request, abbreviation):
 
 
 def api_incidents(request):
-    """GET /api/incidents/ – incidenty do aktuálního kola."""
+    """GET /api/incidents/ - Race incidents up to current lap."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'incidents': []})
@@ -283,7 +268,7 @@ def api_incidents(request):
 
 
 def api_drivers(request):
-    """GET /api/drivers/ – seznam všech jezdců (pro select telemetrie)."""
+    """GET /api/drivers/ - List all drivers for telemetry select."""
     race = _get_active_race()
     if not race:
         return JsonResponse({'status': 'no_race', 'drivers': []})
@@ -292,7 +277,6 @@ def api_drivers(request):
 
     result = []
     for d in drivers:
-        # Zjisti, jestli má tento jezdec telemetrii
         has_tel = Telemetry.objects.filter(race=race, driver=d).exists()
         result.append({
             'abbreviation': d.abbreviation,
